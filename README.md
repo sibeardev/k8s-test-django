@@ -154,13 +154,13 @@ kubectl get svc
 
 ## Шаг 4: Применение манифестов из репозитория
 
-Все необходимые манифесты для развертывания компонентов уже содержатся в папке kubernetes репозитория.
+Все необходимые манифесты для развертывания компонентов уже содержатся в папке k8s-local репозитория.
 
 4.1 Применение манифестов
-Перейдите в папку kubernetes, если вы еще не в ней:
+Перейдите в папку k8s-local, если вы еще не в ней:
 
 ```bash
-cd kubernetes
+cd k8s-local
 ```
 Внесите изменения в django-secrets.yml.
 Значения необходимо закодировать, пример:
@@ -207,3 +207,53 @@ kubectl get pods
 kubectl get svc
 ```
 Вы должны увидеть поды и сервисы для PostgreSQL, Django и CronJob для удаления устаревших сессий.
+
+## Запуск сайта в Yandex CLoud
+
+https://edu-inspiring-stonebraker.sirius-k8s.dvmn.org/
+
+[Серверная инфраструктура: edu-inspiring-stonebraker](https://sirius-env-registry.website.yandexcloud.net/edu-inspiring-stonebraker.html)
+
+[Docker образ](https://hub.docker.com/r/sigvard/k8s-test-django/tags)
+
+Все необходимые манифесты для развертывания компонентов уже содержатся в папке yc-sirius/edu-inspiring-stonebraker репозитория.
+
+5.1 [Установите и инициализируйте](https://yandex.cloud/ru/docs/cli/quickstart#install) интерфейс командной строки Yandex Cloud.
+
+5.2 [Добавьте учетные данные](https://yandex.cloud/ru/docs/managed-kubernetes/operations/connect/#kubectl-connect) кластера Kubernetes в конфигурационный файл kubectl:
+
+5.3 Получите SSL-сертификат для доступа к базе данных PostgreSQL по [инструкции](https://yandex.cloud/ru/docs/managed-postgresql/operations/connect) Yandex Cloud
+
+5.4 Отредактируйте файл django-secrets.yml поставив свои переменные окружения
+
+5.5 Отредактируйте файл django-service.yaml указав в нем необходимый Вам nodePort
+
+5.6 Примените манифесты:
+
+```bash
+kubectl -n <namespace> apply -f yc-sirius/edu-inspiring-stonebraker/django-secrets.yml
+kubectl -n <namespace> apply -f yc-sirius/edu-inspiring-stonebraker/django-deployment.yaml
+kubectl -n <namespace> apply -f yc-sirius/edu-inspiring-stonebraker/django-service.yaml
+```
+
+Применение миграций Django
+
+```bash
+kubectl -n <namespace> apply -f yc-sirius/edu-inspiring-stonebraker/django-migrate.yml
+```
+
+Запуск автоматического удаления устаревших сессий
+
+```bash
+kubectl -n <namespace> apply -f yc-sirius/edu-inspiring-stonebraker/django-clearsession.yml
+```
+
+5.6 Проверка развертывания
+
+Чтобы проверить, что все поды и сервисы развернуты правильно, выполните:
+
+```bash
+kubectl get pods
+kubectl get svc
+```
+Вы должны увидеть поды и сервисы для Django и CronJob для удаления устаревших сессий.
