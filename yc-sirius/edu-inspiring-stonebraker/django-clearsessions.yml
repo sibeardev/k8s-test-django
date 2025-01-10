@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: django-clearsessions
+  namespace: edu-inspiring-stonebraker
+spec:
+  schedule: "0 3 * * 1"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 100
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: django-clearsession-job
+            image: sigvard/k8s-test-django:latest
+            imagePullPolicy: IfNotPresent
+            command: ["python", "manage.py",  "clearsessions"]
+            envFrom:
+              - secretRef:
+                  name: django-secrets

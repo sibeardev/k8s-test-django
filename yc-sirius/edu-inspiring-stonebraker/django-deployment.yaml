@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  namespace: edu-inspiring-stonebraker
+  labels:
+    app.kubernetes.io/name: django
+    app.kubernetes.io/instance: django-test-k8s
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: my-app
+    app.kubernetes.io/managed-by: sibeardev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django-app
+  template:
+    metadata:
+      labels:
+        app: django-app
+    spec:
+      containers:
+        - name: django
+          image: sigvard/k8s-test-django:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: django-secrets
